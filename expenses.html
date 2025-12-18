@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>💰 הוצאות ומלונות</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --shadow: 0 8px 20px rgba(0,0,0,.08);
+      --accent:#2563eb;
+      --good:#16a34a;
+      --danger:#dc2626;
+      --chip:#f1f5f9;
+      --radius:16px;
+    }
+    [data-theme="dark"]{
+      --bg:#0b0f14;
+      --card:#111827;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --border:#1f2a3a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --accent:#60a5fa;
+      --good:#22c55e;
+      --danger:#ef4444;
+      --chip:#0f172a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Arial;
+    }
+    a{color:inherit; text-decoration:none}
+    .topbar{
+      position:sticky; top:0; z-index:20;
+      background:rgba(255,255,255,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    [data-theme="dark"] .topbar{ background:rgba(17,24,39,.75); }
+    .topbar-inner{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      max-width:920px; margin:0 auto;
+    }
+    .tabs{display:flex; gap:8px; flex:1}
+    .tab{
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:999px;
+      font-weight:600;
+      box-shadow: var(--shadow);
+      white-space:nowrap;
+    }
+    .tab.active{ outline:2px solid color-mix(in srgb, var(--accent) 55%, transparent); }
+    .iconbtn{
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:999px;
+      padding:10px 12px;
+      font-weight:700;
+      box-shadow: var(--shadow);
+      cursor:pointer;
+    }
+    .wrap{max-width:920px; margin:0 auto; padding:14px 12px 80px;}
+    .header{display:flex; gap:10px; align-items:flex-start; justify-content:space-between; margin:10px 0 12px;}
+    h1{font-size:20px; margin:0}
+    .sub{color:var(--muted); font-size:13px; margin-top:6px}
+    .actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:var(--card);
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:700;
+      box-shadow: var(--shadow);
+    }
+    .btn.primary{ background: var(--accent); color:#fff; border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); }
+    .btn.danger{ background: var(--danger); color:#fff; border-color: color-mix(in srgb, var(--danger) 60%, var(--border)); }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      padding:12px;
+    }
+    .card-top{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .title{
+      font-weight:900;
+      font-size:16px;
+      line-height:1.25;
+    }
+    .meta{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .chip{
+      background:var(--chip);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .card-actions{
+      display:flex; gap:8px;
+    }
+    .smallbtn{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      border-radius:12px;
+      padding:8px 10px;
+      font-weight:800;
+    }
+    .smallbtn.edit{ border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+    .smallbtn.del{ border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); color: var(--danger); }
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:26px 10px;
+      border:1px dashed var(--border);
+      border-radius:var(--radius);
+    }
+
+    /* modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.45);
+      display:none;
+      z-index:50;
+      padding:18px 12px;
+      overflow:auto;
+    }
+    .modal{
+      max-width:720px;
+      margin:0 auto;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      padding:14px;
+    }
+    .modal h2{margin:0 0 8px; font-size:18px}
+    .form{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .field label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px;
+      font-weight:800;
+    }
+    input, textarea, select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      font-size:16px; /* iOS zoom fix */
+      outline:none;
+    }
+    textarea{ min-height:90px; resize:vertical; }
+    .modal-actions{
+      display:flex; gap:10px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;
+    }
+    .hint{color:var(--muted); font-size:12px; margin-top:6px}
+    @media (max-width:560px){
+      .row{grid-template-columns:1fr}
+      .tab{padding:9px 10px; font-size:13px}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="tabs">
+        <a class="tab" href="packing_v3.html">🎒 Packing</a>
+        <a class="tab active" href="expenses.html">💰 הוצאות</a>
+      </div>
+      <button class="iconbtn" id="themeBtn" title="מצב בהיר/כהה">☀️/🌙</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1>💰 הוצאות ומלונות</h1>
+        <div class="sub">אפשר להוסיף, למחוק, וגם <b>לערוך</b> כל מלון (תאריכים/עלות/ביטול חינם) — הכל נשמר במכשיר.</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="addBtn">➕ הוסף מלון</button>
+        <button class="btn" id="exportBtn">⬇️ ייצוא JSON</button>
+        <button class="btn danger" id="resetBtn">איפוס</button>
+      </div>
+    </div>
+
+    <div class="grid" id="list"></div>
+  </div>
+
+  <!-- modal -->
+  <div class="modalBack" id="modalBack" aria-hidden="true">
+    <div class="modal">
+      <h2 id="modalTitle">הוסף מלון</h2>
+      <div class="form">
+        <div class="field">
+          <label>שם מלון</label>
+          <input id="f_name" placeholder="לדוגמה: Burasari Phuket" />
+        </div>
+        <div class="field">
+          <label>מיקום (אופציונלי)</label>
+          <input id="f_location" placeholder="לדוגמה: Phuket" />
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>מתאריך</label>
+            <input id="f_from" type="date" />
+          </div>
+          <div class="field">
+            <label>עד תאריך</label>
+            <input id="f_to" type="date" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>ביטול חינם עד</label>
+            <input id="f_freeCancel" type="date" />
+            <div class="hint">אם אין — אפשר להשאיר ריק.</div>
+          </div>
+          <div class="field">
+            <label>עלות</label>
+            <div class="row" style="grid-template-columns: 2fr 1fr;">
+              <input id="f_cost" type="number" inputmode="decimal" placeholder="למשל: 1800" />
+              <select id="f_currency">
+                <option value="THB">THB</option>
+                <option value="USD">USD</option>
+                <option value="ILS">ILS</option>
+                <option value="CAD">CAD</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>הערות (אופציונלי)</label>
+          <textarea id="f_notes" placeholder="מספר הזמנה, קישור, מה כלול, וכו׳"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="cancelBtn">ביטול</button>
+        <button class="btn danger" id="deleteBtn" style="display:none;">מחק</button>
+        <button class="btn primary" id="saveBtn">שמור</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const STORAGE_KEY = "expenses_v1";
+  const THEME_KEY = "theme_v1";
+
+  const $ = (id) => document.getElementById(id);
+  const listEl = $("list");
+  const modalBack = $("modalBack");
+  const modalTitle = $("modalTitle");
+
+  const fields = {
+    name: $("f_name"),
+    location: $("f_location"),
+    from: $("f_from"),
+    to: $("f_to"),
+    freeCancel: $("f_freeCancel"),
+    cost: $("f_cost"),
+    currency: $("f_currency"),
+    notes: $("f_notes"),
+  };
+
+  let items = loadItems();
+  let editId = null;
+
+  // theme
+  const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  setTheme(savedTheme);
+  $("themeBtn").addEventListener("click", () => {
+    const next = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+  function setTheme(t){
+    document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+  }
+
+  // init
+  render();
+
+  // buttons
+  $("addBtn").addEventListener("click", () => openModalForAdd());
+  $("cancelBtn").addEventListener("click", closeModal);
+  modalBack.addEventListener("click", (e) => { if (e.target === modalBack) closeModal(); });
+
+  $("saveBtn").addEventListener("click", () => {
+    const data = readForm();
+    if (!data.name.trim()){
+      alert("חסר שם מלון 🙂");
+      fields.name.focus();
+      return;
+    }
+    if (editId){
+      const idx = items.findIndex(x => x.id === editId);
+      if (idx >= 0) items[idx] = { ...items[idx], ...data };
+    } else {
+      items.unshift({ id: cryptoId(), ...data, createdAt: Date.now() });
+    }
+    saveItems();
+    render();
+    closeModal();
+  });
+
+  $("deleteBtn").addEventListener("click", () => {
+    if (!editId) return;
+    if (!confirm("למחוק את הרשומה?")) return;
+    items = items.filter(x => x.id !== editId);
+    saveItems();
+    render();
+    closeModal();
+  });
+
+  $("resetBtn").addEventListener("click", () => {
+    if (!confirm("לאפס את כל רשימת ההוצאות?")) return;
+    items = [];
+    saveItems();
+    render();
+  });
+
+  $("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(items, null, 2)], {type: "application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "expenses.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  function render(){
+    listEl.innerHTML = "";
+    if (!items.length){
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.innerHTML = "אין עדיין רשומות. לחץ <b>➕ הוסף מלון</b> כדי להתחיל.";
+      listEl.appendChild(empty);
+      return;
+    }
+
+    items
+      .slice()
+      .sort((a,b) => (b.createdAt||0) - (a.createdAt||0))
+      .forEach(item => listEl.appendChild(cardFor(item)));
+  }
+
+  function cardFor(item){
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = esc(item.name || "");
+    const location = (item.location||"").trim();
+    const dateRange = formatRange(item.from, item.to);
+    const freeCancel = item.freeCancel ? `ביטול חינם עד ${formatDate(item.freeCancel)}` : "";
+    const costStr = formatCost(item.cost, item.currency);
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div style="min-width:0;">
+          <div class="title">${title}</div>
+          <div class="meta">
+            ${location ? `<span class="chip">📍 ${esc(location)}</span>` : ""}
+            ${dateRange ? `<span class="chip">📅 ${esc(dateRange)}</span>` : ""}
+            ${freeCancel ? `<span class="chip" style="border-color: color-mix(in srgb, var(--good) 45%, var(--border));">✅ ${esc(freeCancel)}</span>` : ""}
+            ${costStr ? `<span class="chip">💸 ${esc(costStr)}</span>` : ""}
+          </div>
+          ${item.notes ? `<div class="sub" style="margin-top:8px; white-space:pre-wrap;">${esc(item.notes)}</div>` : ""}
+        </div>
+        <div class="card-actions">
+          <button class="smallbtn edit" type="button" title="עריכה">✏️</button>
+          <button class="smallbtn del" type="button" title="מחיקה">🗑️</button>
+        </div>
+      </div>
+    `;
+
+    const [editBtn, delBtn] = card.querySelectorAll("button");
+    editBtn.addEventListener("click", () => openModalForEdit(item));
+    delBtn.addEventListener("click", () => {
+      if (!confirm("למחוק את הרשומה?")) return;
+      items = items.filter(x => x.id !== item.id);
+      saveItems();
+      render();
+    });
+
+    return card;
+  }
+
+  function openModalForAdd(){
+    editId = null;
+    modalTitle.textContent = "➕ הוסף מלון";
+    $("deleteBtn").style.display = "none";
+    clearForm();
+    showModal();
+    setTimeout(() => fields.name.focus(), 50);
+  }
+
+  function openModalForEdit(item){
+    editId = item.id;
+    modalTitle.textContent = "✏️ עריכת מלון";
+    $("deleteBtn").style.display = "inline-block";
+    fillForm(item);
+    showModal();
+    setTimeout(() => fields.name.focus(), 50);
+  }
+
+  function showModal(){
+    modalBack.style.display = "block";
+    modalBack.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+  function closeModal(){
+    modalBack.style.display = "none";
+    modalBack.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  function readForm(){
+    return {
+      name: fields.name.value.trim(),
+      location: fields.location.value.trim(),
+      from: fields.from.value || "",
+      to: fields.to.value || "",
+      freeCancel: fields.freeCancel.value || "",
+      cost: fields.cost.value ? String(fields.cost.value) : "",
+      currency: fields.currency.value || "THB",
+      notes: fields.notes.value.trim(),
+    };
+  }
+  function fillForm(item){
+    fields.name.value = item.name || "";
+    fields.location.value = item.location || "";
+    fields.from.value = item.from || "";
+    fields.to.value = item.to || "";
+    fields.freeCancel.value = item.freeCancel || "";
+    fields.cost.value = item.cost || "";
+    fields.currency.value = item.currency || "THB";
+    fields.notes.value = item.notes || "";
+  }
+  function clearForm(){
+    Object.values(fields).forEach(el => { el.value = ""; });
+    fields.currency.value = "THB";
+  }
+
+  function loadItems(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+      return [];
+    }catch{ return []; }
+  }
+  function saveItems(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }
+
+  function formatDate(iso){
+    if (!iso) return "";
+    const parts = iso.split("-");
+    if (parts.length !== 3) return iso;
+    const [y,m,d] = parts;
+    if (!y || !m || !d) return iso;
+    return `${d.padStart(2,"0")}.${m.padStart(2,"0")}.${y}`;
+  }
+  function formatRange(from,to){
+    if (!from && !to) return "";
+    if (from && to) return `${formatDate(from)} → ${formatDate(to)}`;
+    if (from) return `מ-${formatDate(from)}`;
+    return `עד ${formatDate(to)}`;
+  }
+  function formatCost(cost, currency){
+    const c = (cost||"").toString().trim();
+    if (!c) return "";
+    const cur = (currency||"").toString().trim() || "THB";
+    return `${c} ${cur}`;
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, (ch) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[ch]));
+  }
+  function cryptoId(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "id_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+  }
+})();
+</script>
+</body>
+</html>
