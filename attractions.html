@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🎟️ אטרקציות</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --shadow: 0 8px 20px rgba(0,0,0,.08);
+      --accent:#2563eb;
+      --good:#16a34a;
+      --danger:#dc2626;
+      --chip:#f1f5f9;
+      --radius:16px;
+    }
+    [data-theme="dark"]{
+      --bg:#0b0f14;
+      --card:#111827;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --border:#1f2a3a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --accent:#60a5fa;
+      --good:#22c55e;
+      --danger:#ef4444;
+      --chip:#0f172a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Arial;
+    }
+    a{color:inherit; text-decoration:none}
+    .topbar{
+      position:sticky; top:0; z-index:20;
+      background:rgba(255,255,255,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    [data-theme="dark"] .topbar{ background:rgba(17,24,39,.75); }
+    .topbar-inner{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      max-width:920px; margin:0 auto;
+    }
+    .tabs{display:flex; gap:8px; flex:1; flex-wrap:wrap}
+    .tab{
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:999px;
+      font-weight:800;
+      box-shadow: var(--shadow);
+      white-space:nowrap;
+      font-size:14px;
+    }
+    .tab.active{ outline:2px solid color-mix(in srgb, var(--accent) 55%, transparent); }
+    .iconbtn{
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:999px;
+      padding:10px 12px;
+      font-weight:900;
+      box-shadow: var(--shadow);
+      cursor:pointer;
+    }
+    .wrap{max-width:920px; margin:0 auto; padding:14px 12px 90px;}
+    .header{
+      display:flex; gap:10px; align-items:flex-start; justify-content:space-between;
+      margin:10px 0 12px; flex-wrap:wrap;
+    }
+    h1{font-size:20px; margin:0}
+    .sub{color:var(--muted); font-size:13px; margin-top:6px}
+    .actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:center}
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:var(--card);
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:900;
+      box-shadow: var(--shadow);
+    }
+    .btn.primary{ background: var(--accent); color:#fff; border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); }
+    .btn.danger{ background: var(--danger); color:#fff; border-color: color-mix(in srgb, var(--danger) 60%, var(--border)); }
+
+    .summary{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin:6px 0 0;
+    }
+    .chip{
+      background:var(--chip);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .filters{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top:10px;
+      align-items:center;
+    }
+    .filters label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+    }
+    select{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--card);
+      color:var(--text);
+      font-size:16px; /* iOS zoom fix */
+      box-shadow: var(--shadow);
+      outline:none;
+      min-width: 220px;
+    }
+    .grid{display:grid; grid-template-columns:1fr; gap:10px; margin-top:14px;}
+
+    /* place sections (better separation) */
+    details.place{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    summary.placeHead{
+      cursor:pointer;
+      list-style:none;
+      padding:12px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    summary.placeHead::-webkit-details-marker{ display:none; }
+    .placeTitle{
+      font-weight:950;
+      font-size:16px;
+      line-height:1.25;
+    }
+    .placeMeta{
+      margin-top:6px;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .chev{
+      font-weight:900;
+      color:var(--muted);
+      padding:6px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:transparent;
+      flex:0 0 auto;
+    }
+    details[open] .chev{ color:var(--text); }
+    .placeBody{
+      padding:10px 12px 12px;
+      border-top:1px solid var(--border);
+      display:grid;
+      gap:10px;
+    }
+
+    /* attraction card */
+    .card{
+      background:transparent;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:12px;
+    }
+    .card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+    .title{font-weight:950; font-size:16px; line-height:1.25;}
+    .meta{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:6px;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .card-actions{display:flex; gap:8px;}
+    .smallbtn{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      border-radius:12px;
+      padding:8px 10px;
+      font-weight:900;
+    }
+    .smallbtn.edit{ border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+    .smallbtn.del{ border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); color: var(--danger); }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:26px 10px;
+      border:1px dashed var(--border);
+      border-radius:var(--radius);
+    }
+
+    /* modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.45);
+      display:none;
+      z-index:50;
+      padding:18px 12px;
+      overflow:auto;
+    }
+    .modal{
+      max-width:720px;
+      margin:0 auto;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      padding:14px;
+    }
+    .modal h2{margin:0 0 8px; font-size:18px}
+    .form{display:grid; grid-template-columns:1fr; gap:10px;}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    .field label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px;
+      font-weight:900;
+    }
+    input, textarea{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      font-size:16px;
+      outline:none;
+    }
+    textarea{ min-height:90px; resize:vertical; }
+    .modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;}
+    .hint{color:var(--muted); font-size:12px; margin-top:6px}
+    @media (max-width:560px){
+      .row{grid-template-columns:1fr}
+      .tab{padding:9px 10px; font-size:13px}
+      select{min-width: 180px;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="tabs">
+        <a class="tab" href="packing_v3.html">🎒 Packing</a>
+        <a class="tab" href="expenses.html">💰 הוצאות</a>
+        <a class="tab active" href="attractions.html">🎟️ אטרקציות</a>
+      </div>
+      <button class="iconbtn" id="themeBtn" title="מצב בהיר/כהה">☀️/🌙</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1>🎟️ אטרקציות לפי מקום</h1>
+        <div class="sub">יש לך עכשיו סינון לפי מקום + הפרדה ברורה (כל מקום נפתח/נסגר).</div>
+        <div class="summary" id="summary"></div>
+
+        <div class="filters">
+          <label for="placeFilter">סינון מקום</label>
+          <select id="placeFilter" aria-label="סינון מקום">
+            <option value="__ALL__">כל המקומות</option>
+          </select>
+          <button class="btn" id="clearFilterBtn" type="button">נקה סינון</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="addBtn">➕ הוסף אטרקציה</button>
+        <button class="btn" id="exportBtn">⬇️ ייצוא JSON</button>
+        <button class="btn danger" id="resetBtn">איפוס</button>
+      </div>
+    </div>
+
+    <div class="grid" id="list"></div>
+  </div>
+
+  <!-- modal -->
+  <div class="modalBack" id="modalBack" aria-hidden="true">
+    <div class="modal">
+      <h2 id="modalTitle">הוסף אטרקציה</h2>
+      <div class="form">
+        <div class="field">
+          <label>מקום / אזור</label>
+          <input id="f_place" placeholder="לדוגמה: Phuket / Krabi / Bangkok" />
+          <div class="hint">זה משמש לקיבוץ וסינון. אפשר גם שם מלון/אי.</div>
+        </div>
+
+        <div class="field">
+          <label>שם אטרקציה</label>
+          <input id="f_name" placeholder="לדוגמה: James Bond Island Tour" />
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>תאריך (אופציונלי)</label>
+            <input id="f_date" type="date" />
+          </div>
+          <div class="field">
+            <label>שעה (אופציונלי)</label>
+            <input id="f_time" type="time" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>מחיר (אופציונלי)</label>
+            <input id="f_cost" type="number" inputmode="decimal" placeholder="למשל: 1500" />
+            <div class="hint">אם אין מחיר – תשאיר ריק.</div>
+          </div>
+          <div class="field">
+            <label>מטבע</label>
+            <select id="f_currency">
+              <option value="THB">THB</option>
+              <option value="USD">USD</option>
+              <option value="ILS">ILS</option>
+              <option value="CAD">CAD</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>קישור (אופציונלי)</label>
+          <input id="f_link" placeholder="למשל: https://..." />
+        </div>
+
+        <div class="field">
+          <label>הערות (אופציונלי)</label>
+          <textarea id="f_notes" placeholder="איך להגיע, עם מי סוגרים, מה כולל וכו׳"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="cancelBtn">ביטול</button>
+        <button class="btn danger" id="deleteBtn" style="display:none;">מחק</button>
+        <button class="btn primary" id="saveBtn">שמור</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const STORAGE_KEY = "attractions_v1";
+  const THEME_KEY = "theme_v1";
+
+/******** Cloud Sync (Google Sheets via Apps Script) ********/
+const CLOUD = {
+  apiUrl: "https://script.google.com/macros/s/AKfycbyDVtpFyQoXX67jpcfZ7MxbVEfLusK6mnmyXbddncq1_UAZbTWk_tUbasQbLO0ADy6maw/exec",
+};
+const CLOUD_STAMP_KEY = "attractions_cloud_stamp_v1";
+let cloudPushTimer = null;
+
+function cloudEnabled(){
+  return typeof CLOUD.apiUrl === "string" && CLOUD.apiUrl.startsWith("https://script.google.com/macros/s/");
+}
+
+async function cloudGet(action){
+  const url = `${CLOUD.apiUrl}?action=${encodeURIComponent(action)}&token=${encodeURIComponent(CLOUD.token)}`;
+  const res = await fetch(url, { cache: "no-store" });
+  return await res.json();
+}
+async function cloudPost(action, payload){
+  const res = await fetch(CLOUD.apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: CLOUD.token, action, ...payload })
+  });
+  return await res.json();
+}
+
+function scheduleCloudPush(){
+  if (!cloudEnabled()) return;
+  clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(async () => {
+    try{
+      const r = await cloudPost("setAttractions", { items });
+      if (r && r.ok && r.stamp) localStorage.setItem(CLOUD_STAMP_KEY, String(r.stamp));
+    }catch(e){ /* silent */ }
+  }, 600);
+}
+
+function maxStamp(list){
+  let max = 0;
+  for (const it of list || []){
+    const t = it.updatedAt || it.createdAt || 0;
+    const n = typeof t === "number" ? t : Date.parse(t);
+    if (Number.isFinite(n)) max = Math.max(max, n);
+  }
+  return max;
+}
+
+async function cloudPullAndRender(){
+  try{
+    if (!cloudEnabled()) return;
+    if (modalBack && modalBack.style.display === "block") return;
+
+    const r = await cloudGet("getAttractions");
+    if (!r || !r.ok || !Array.isArray(r.items)) return;
+
+    const remoteStamp = maxStamp(r.items);
+    const localStamp = Number(localStorage.getItem(CLOUD_STAMP_KEY) || 0) || 0;
+
+    if (remoteStamp > localStamp){
+      items = r.items;
+      saveItems();
+      localStorage.setItem(CLOUD_STAMP_KEY, String(remoteStamp));
+      rebuildPlaceOptions(true);
+      render();
+    }
+  }catch(e){ /* silent */ }
+}
+/************************************************************/ // shared with other pages
+
+  const $ = (id) => document.getElementById(id);
+  const listEl = $("list");
+  const summaryEl = $("summary");
+  const modalBack = $("modalBack");
+  const modalTitle = $("modalTitle");
+  const placeFilter = $("placeFilter");
+
+  const fields = {
+    place: $("f_place"),
+    name: $("f_name"),
+    date: $("f_date"),
+    time: $("f_time"),
+    cost: $("f_cost"),
+    currency: $("f_currency"),
+    link: $("f_link"),
+    notes: $("f_notes"),
+  };
+
+  let items = loadItems();
+  let editId = null;
+
+  // theme (shared)
+  const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  setTheme(savedTheme);
+  $("themeBtn").addEventListener("click", () => {
+    const next = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+  function setTheme(t){
+    document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+  }
+
+  // place filter events
+  placeFilter.addEventListener("change", render);
+  $("clearFilterBtn").addEventListener("click", () => {
+    placeFilter.value = "__ALL__";
+    render();
+  });
+
+  // init
+  init();
+
+  async function init(){
+    rebuildPlaceOptions();
+    render();
+    await cloudPullAndRender();
+    setInterval(cloudPullAndRender, 15000);
+  }
+
+  // buttons
+  $("addBtn").addEventListener("click", () => openModalForAdd());
+  $("cancelBtn").addEventListener("click", closeModal);
+  modalBack.addEventListener("click", (e) => { if (e.target === modalBack) closeModal(); });
+
+  $("saveBtn").addEventListener("click", () => {
+    const data = readForm();
+    if (!data.place.trim()){
+      alert("חסר מקום / אזור 🙂");
+      fields.place.focus();
+      return;
+    }
+    if (!data.name.trim()){
+      alert("חסר שם אטרקציה 🙂");
+      fields.name.focus();
+      return;
+    }
+
+    if (editId){
+      const idx = items.findIndex(x => x.id === editId);
+      if (idx >= 0) items[idx] = { ...items[idx], ...data };
+    } else {
+      items.unshift({ id: cryptoId(), ...data, createdAt: Date.now() });
+    }
+    saveItems();
+    scheduleCloudPush();
+    rebuildPlaceOptions(true);
+    render();
+    closeModal();
+  });
+
+  $("deleteBtn").addEventListener("click", () => {
+    if (!editId) return;
+    if (!confirm("למחוק את האטרקציה?")) return;
+    items = items.filter(x => x.id !== editId);
+    saveItems();
+    scheduleCloudPush();
+    rebuildPlaceOptions(true);
+    render();
+    closeModal();
+  });
+
+  $("resetBtn").addEventListener("click", () => {
+    if (!confirm("לאפס את כל רשימת האטרקציות?")) return;
+    items = [];
+    saveItems();
+    scheduleCloudPush();
+    rebuildPlaceOptions(true);
+    render();
+  });
+
+  $("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(items, null, 2)], {type: "application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "attractions.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  function currentFilter(){
+    const v = placeFilter.value || "__ALL__";
+    return v === "__ALL__" ? null : v;
+  }
+
+  function render(){
+    listEl.innerHTML = "";
+    renderSummary();
+
+    const filter = currentFilter();
+
+    const filtered = filter
+      ? items.filter(x => norm(x.place) === filter)
+      : items.slice();
+
+    if (!filtered.length){
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.innerHTML = filter
+        ? "אין אטרקציות למקום שסיננת. נסה לבחור <b>כל המקומות</b>."
+        : "אין עדיין אטרקציות. לחץ <b>➕ הוסף אטרקציה</b> כדי להתחיל.";
+      listEl.appendChild(empty);
+      return;
+    }
+
+    // group by place
+    const groups = new Map();
+    for (const it of filtered){
+      const key = (it.place||"").trim() || "ללא מקום";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(it);
+    }
+
+    // sort groups by name (stable) or by count - here: by count desc
+    const sortedPlaces = [...groups.keys()].sort((a,b)=> groups.get(b).length - groups.get(a).length);
+
+    for (const place of sortedPlaces){
+      const placeItems = groups.get(place).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+      listEl.appendChild(placeSection(place, placeItems, !!filter));
+    }
+  }
+
+  function renderSummary(){
+    const totalCount = items.length;
+    const places = new Set(items.map(x => normLabel(x.place)).filter(Boolean));
+    const totals = totalsByCurrency(items);
+
+    summaryEl.innerHTML = "";
+    summaryEl.appendChild(chip(`📌 מקומות: ${places.size}`));
+    summaryEl.appendChild(chip(`🎟️ אטרקציות: ${totalCount}`));
+    const costText = formatTotalsLine(totals);
+    if (costText) summaryEl.appendChild(chip(`💸 סה״כ: ${costText}`));
+
+    const filter = currentFilter();
+    if (filter){
+      const label = denormLabel(filter);
+      summaryEl.appendChild(chip(`🔎 מסונן: ${label}`));
+    }
+  }
+
+  function rebuildPlaceOptions(keepSelection=false){
+    const before = placeFilter.value;
+    const unique = [...new Set(items.map(x => norm(x.place)).filter(Boolean))].sort((a,b)=> a.localeCompare(b));
+    placeFilter.innerHTML = `<option value="__ALL__">כל המקומות</option>` + unique.map(v=>{
+      return `<option value="${escAttr(v)}">${esc(denormLabel(v))}</option>`;
+    }).join("");
+
+    if (keepSelection && before && [...placeFilter.options].some(o => o.value === before)){
+      placeFilter.value = before;
+    } else {
+      placeFilter.value = "__ALL__";
+    }
+  }
+
+  function totalsByCurrency(arr){
+    const map = new Map();
+    for (const it of arr){
+      const raw = (it.cost||"").toString().trim();
+      if (!raw) continue;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) continue;
+      const cur = (it.currency||"THB").toString().trim() || "THB";
+      map.set(cur, (map.get(cur)||0) + n);
+    }
+    return map;
+  }
+  function formatTotalsLine(map){
+    if (!map || map.size === 0) return "";
+    const parts = [];
+    for (const [cur, sum] of map.entries()){
+      parts.push(`${formatNumber(sum)} ${cur}`);
+    }
+    return parts.join(" • ");
+  }
+  function formatNumber(n){
+    const rounded = Math.round((n + Number.EPSILON) * 100) / 100;
+    return rounded.toLocaleString("en-US", {maximumFractionDigits: 2});
+  }
+
+  function placeSection(place, placeItems, forceOpen){
+    const details = document.createElement("details");
+    details.className = "place";
+    if (forceOpen) details.open = true;
+    else details.open = true; // default open
+
+    const t = totalsByCurrency(placeItems);
+    const line = formatTotalsLine(t);
+
+    const summary = document.createElement("summary");
+    summary.className = "placeHead";
+    summary.innerHTML = `
+      <div style="min-width:0;">
+        <div class="placeTitle">📍 ${esc(place)}</div>
+        <div class="placeMeta">
+          <span class="chip">🎟️ ${placeItems.length} אטרקציות</span>
+          ${line ? `<span class="chip">💸 ${esc(line)}</span>` : ``}
+        </div>
+      </div>
+      <span class="chev">פתח/סגור</span>
+    `;
+
+    const body = document.createElement("div");
+    body.className = "placeBody";
+    for (const item of placeItems){
+      body.appendChild(cardFor(item));
+    }
+
+    details.appendChild(summary);
+    details.appendChild(body);
+    return details;
+  }
+
+  function cardFor(item){
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = esc(item.name || "");
+    const dateTime = formatDateTime(item.date, item.time);
+    const costStr = formatCost(item.cost, item.currency);
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div style="min-width:0;">
+          <div class="title">${title}</div>
+          <div class="meta">
+            ${dateTime ? `<span class="chip">🗓️ ${esc(dateTime)}</span>` : ""}
+            ${costStr ? `<span class="chip">💸 ${esc(costStr)}</span>` : ""}
+            ${item.link ? `<a class="chip" href="${safeHref(item.link)}" target="_blank" rel="noopener">🔗 קישור</a>` : ""}
+          </div>
+          ${item.notes ? `<div class="sub" style="margin-top:8px; white-space:pre-wrap;">${esc(item.notes)}</div>` : ""}
+        </div>
+        <div class="card-actions">
+          <button class="smallbtn edit" type="button" title="עריכה">✏️</button>
+          <button class="smallbtn del" type="button" title="מחיקה">🗑️</button>
+        </div>
+      </div>
+    `;
+
+    const [editBtn, delBtn] = card.querySelectorAll("button");
+    editBtn.addEventListener("click", () => openModalForEdit(item));
+    delBtn.addEventListener("click", () => {
+      if (!confirm("למחוק את האטרקציה?")) return;
+      items = items.filter(x => x.id !== item.id);
+      saveItems();
+      rebuildPlaceOptions(true);
+      render();
+    });
+
+    return card;
+  }
+
+  function openModalForAdd(){
+    editId = null;
+    modalTitle.textContent = "➕ הוסף אטרקציה";
+    $("deleteBtn").style.display = "none";
+    clearForm();
+    showModal();
+    setTimeout(() => fields.place.focus(), 50);
+  }
+
+  function openModalForEdit(item){
+    editId = item.id;
+    modalTitle.textContent = "✏️ עריכת אטרקציה";
+    $("deleteBtn").style.display = "inline-block";
+    fillForm(item);
+    showModal();
+    setTimeout(() => fields.place.focus(), 50);
+  }
+
+  function showModal(){
+    modalBack.style.display = "block";
+    modalBack.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+  function closeModal(){
+    modalBack.style.display = "none";
+    modalBack.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  function readForm(){
+    return {
+      place: fields.place.value.trim(),
+      name: fields.name.value.trim(),
+      date: fields.date.value || "",
+      time: fields.time.value || "",
+      cost: fields.cost.value ? String(fields.cost.value) : "",
+      currency: fields.currency.value || "THB",
+      link: fields.link.value.trim(),
+      notes: fields.notes.value.trim(),
+    };
+  }
+  function fillForm(item){
+    fields.place.value = item.place || "";
+    fields.name.value = item.name || "";
+    fields.date.value = item.date || "";
+    fields.time.value = item.time || "";
+    fields.cost.value = item.cost || "";
+    fields.currency.value = item.currency || "THB";
+    fields.link.value = item.link || "";
+    fields.notes.value = item.notes || "";
+  }
+  function clearForm(){
+    Object.values(fields).forEach(el => { el.value = ""; });
+    fields.currency.value = "THB";
+  }
+
+  function loadItems(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+      return [];
+    }catch{ return []; }
+  }
+  function saveItems(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }
+
+  function formatDate(iso){
+    if (!iso) return "";
+    const parts = iso.split("-");
+    if (parts.length !== 3) return iso;
+    const [y,m,d] = parts;
+    if (!y || !m || !d) return iso;
+    return `${d.padStart(2,"0")}.${m.padStart(2,"0")}.${y}`;
+  }
+  function formatDateTime(date, time){
+    const d = formatDate(date||"");
+    const t = (time||"").trim();
+    if (d && t) return `${d} ${t}`;
+    return d || t || "";
+  }
+  function formatCost(cost, currency){
+    const c = (cost||"").toString().trim();
+    if (!c) return "";
+    const cur = (currency||"").toString().trim() || "THB";
+    return `${c} ${cur}`;
+  }
+  function chip(text){
+    const el = document.createElement("span");
+    el.className = "chip";
+    el.textContent = text;
+    return el;
+  }
+
+  // normalize place for filtering (case-insensitive)
+  function normLabel(s){
+    return (s||"").toString().trim();
+  }
+  function norm(s){
+    const v = (s||"").toString().trim();
+    if (!v) return "";
+    return v.toLowerCase();
+  }
+  function denormLabel(normValue){
+    // show normalized value in nicer form (capitalize first letter)
+    if (!normValue) return "";
+    return normValue.split(" ").map(w => w ? (w[0].toUpperCase() + w.slice(1)) : "").join(" ");
+  }
+
+  function safeHref(url){
+    const u = (url||"").toString().trim();
+    if (!u) return "#";
+    // if missing protocol, add https://
+    if (!/^https?:\/\//i.test(u)) return "https://" + encodeURI(u);
+    return encodeURI(u);
+  }
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, (ch) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[ch]));
+  }
+  function escAttr(s){
+    return String(s).replace(/"/g, "%22").replace(/</g, "%3C").replace(/>/g, "%3E");
+  }
+  function cryptoId(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "id_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+  }
+})();
+</script>
+</body>
+</html>
